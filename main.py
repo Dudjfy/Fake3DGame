@@ -23,9 +23,40 @@ p_y = 19
 # p_x, p_y = game_map.return_random_empty_spot()
 
 
-player = Player(x=p_x, y=p_y, vel=10, fov=math.pi / 2, angle_change=(math.pi))
+player = Player(x=p_x, y=p_y, vel=10, fov=math.pi / 2, angle_change=(math.pi / 2))
 
-py_win = PygameWin(win_width=1000, win_height=600, fps=60, win_name='Ray Tracing Test', mouse_sensitivity=4)
+"""         Window presets          """
+
+# Classic
+w, h, i_w = 1000, 600, 200
+
+# Info bar and mini map
+# w, h, i_w = 1000, 300, 200
+
+# Only mini map
+# w, h, i_w = 1000, 200, 200
+
+# Full screen large info
+# w, h, i_w = 1920, 1080, 400
+
+# Full screen smaller info
+# w, h, i_w = 1920, 1080, 200
+
+# Full screen no info
+# w, h, i_w = 1920, 1080, 0
+
+# Performance 1
+# w, h, i_w = 500, 300, 100
+
+# Performance 2
+# w, h, i_w = 300, 200, 100
+
+# Performance 3
+# w, h, i_w = 200, 100, 0
+
+
+py_win = PygameWin(win_width=w, win_height=h, fps=200, win_name='Ray Tracing Test',
+                   mouse_sensitivity=0.1, arrows_sensitivity=2, info_width=i_w)
 
 # print(win.get_width(), win.get_height(), game_surface.get_width(), game_surface.get_height(),
 #       info_surface.get_width(), info_surface.get_height())
@@ -53,8 +84,8 @@ while game_on:
 
     dt.new_dt()
 
-    game_on = py_win.event_handler(player, dt)
     py_win.mouse_movement(player, dt)
+    game_on = py_win.event_handler(player, dt)
 
     player.move(dt, game_map)
     player.change_angle(dt)

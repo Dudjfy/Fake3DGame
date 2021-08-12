@@ -36,4 +36,5 @@ class Player:
             self.y += self.new_y
 
     def change_angle(self, dt):
-        self.angle = round(self.angle + self.new_angle * dt.dt, 4)
+        # print(self.angle, self.new_angle)
+        self.angle += self.new_angle

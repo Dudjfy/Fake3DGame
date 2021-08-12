@@ -12,10 +12,13 @@ class PygameWin:
         'gray': (100, 100, 100),
     }
 
-    def __init__(self, win_width=1000, win_height=600, fps=60, win_name='Ray Tracing Test', mouse_sensitivity=1):
+    def __init__(self, win_width=1000, win_height=600, fps=60, win_name='Ray Tracing Test',
+                 mouse_sensitivity=0.1, arrows_sensitivity=2, info_width=200):
         self.win_name = win_name
         self.fps = fps
         self.tick = 0
+
+        self.info_width = info_width
 
         self.win = pygame.display.set_mode((win_width, win_height))
         pygame.display.set_caption(self.win_name)
@@ -26,8 +29,9 @@ class PygameWin:
         pygame.mouse.set_visible(False)
         pygame.event.set_grab(True)
         self.mouse_sensitivity = mouse_sensitivity
+        self.arrows_sensitivity = arrows_sensitivity
 
-        self.game_surface = pygame.Surface((self.win.get_width() - 200, self.win.get_height()))
+        self.game_surface = pygame.Surface((self.win.get_width() - self.info_width, self.win.get_height()))
         self.info_surface = pygame.Surface((self.win.get_width() - self.game_surface.get_width(),
                                             self.win.get_height()))
         self.mini_map_surface = pygame.Surface((self.info_surface.get_width(), self.info_surface.get_width()))
@@ -41,7 +45,6 @@ class PygameWin:
 
             player.new_x = 0
             player.new_y = 0
-            player.new_angle = 0
 
             if keys[pygame.K_w] or keys[pygame.K_UP]:
                 player.new_x = math.cos(player.angle) * player.move_distance * dt.dt
@@ -56,14 +59,18 @@ class PygameWin:
                 player.new_x = math.cos(player.angle + math.pi / 2) * player.move_distance * dt.dt
                 player.new_y = math.sin(player.angle + math.pi / 2) * player.move_distance * dt.dt
 
-            if keys[pygame.K_LEFT]:
-                player.new_angle -= player.angle_change
-            if keys[pygame.K_RIGHT]:
-                player.new_angle += player.angle_change
         return True
 
     def mouse_movement(self, player, dt):
-        if pygame.mouse.get_focused():
+        player.new_angle = 0
+        keys = pygame.key.get_pressed()
+
+        if keys[pygame.K_LEFT] or keys[pygame.K_RIGHT]:
+            if keys[pygame.K_LEFT]:
+                player.new_angle -= player.angle_change * dt.dt * self.arrows_sensitivity
+            if keys[pygame.K_RIGHT]:
+                player.new_angle += player.angle_change * dt.dt * self.arrows_sensitivity
+        else:
             player.new_angle = pygame.mouse.get_rel()[0] * dt.dt * self.mouse_sensitivity
 
     def draw_on_update(self, player, game_map, rt):
