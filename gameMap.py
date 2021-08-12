@@ -1,3 +1,6 @@
+import random
+
+
 class GameMap:
     def __init__(self, width=10, height=10):
         # self.map = [
@@ -19,8 +22,8 @@ class GameMap:
         self.map = {}
         # self.create_empty_map_with_borders()
 
-    def create_map_from_file(self):
-        file = open('map.txt', 'r')
+    def create_map_from_file(self, file_name):
+        file = open(file_name, 'r')
 
         for y, row in enumerate(file):
             for x, tile in enumerate(row):
@@ -28,8 +31,8 @@ class GameMap:
                     self.map[(x, y)] = Tile('#', True)
                 elif tile == ' ':
                     self.map[(x, y)] = Tile(' ', False)
-                self.height = x + 1
-            self.width = y + 1
+                self.width = x + 1
+            self.height = y + 1
 
         file.close()
 
@@ -42,11 +45,14 @@ class GameMap:
             for x in range(1, self.width - 1):
                 self.map[(x, y)] = Tile(' ', False)
 
-    def print_map(self):
-        for row in self.map:
-            for tile in row:
-                print(tile.sign, end='')
-            print()
+    def return_random_empty_spot(self):
+        while True:
+            rand_x = random.randint(0, self.width - 1)
+            rand_y = random.randint(0, self.height - 1)
+            coords = (rand_x, rand_y)
+            print(coords, self.map.get(coords))
+            if not (self.map.get(coords)).blocks_movement:
+                return coords
 
 class Tile:
     def __init__(self, sign='?', blocks_movement=False):

@@ -8,15 +8,24 @@ from player import Player
 from pygameWin import PygameWin
 from rayTracing import RayTracing
 
-game_map = GameMap(17, 17)
-# game_map.create_map_from_file()
-game_map.create_empty_map_with_borders()
-game_map.map[(5, 5)] = Tile('#', True)
-# game_map.print_map()
+game_map = GameMap(20, 20)
+# game_map.create_map_from_file('map.txt')
+game_map.create_map_from_file('map_SA.txt')
+# game_map.create_empty_map_with_borders()
+# game_map.map[(5, 5)] = Tile('#', True)
 
-player = Player(game_map.width / 2, game_map.height / 2, vel=10, fov=math.pi / 2, angle_change=(math.pi))
+# p_x = game_map.height / 2
+# p_y = game_map.height / 2
 
-py_win = PygameWin(win_width=1000, win_height=600, fps=60, win_name='Ray Tracing Test')
+p_x = 78
+p_y = 19
+
+# p_x, p_y = game_map.return_random_empty_spot()
+
+
+player = Player(x=p_x, y=p_y, vel=10, fov=math.pi / 2, angle_change=(math.pi))
+
+py_win = PygameWin(win_width=1000, win_height=600, fps=60, win_name='Ray Tracing Test', mouse_sensitivity=4)
 
 # print(win.get_width(), win.get_height(), game_surface.get_width(), game_surface.get_height(),
 #       info_surface.get_width(), info_surface.get_height())
@@ -45,6 +54,7 @@ while game_on:
     dt.new_dt()
 
     game_on = py_win.event_handler(player, dt)
+    py_win.mouse_movement(player, dt)
 
     player.move(dt, game_map)
     player.change_angle(dt)

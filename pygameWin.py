@@ -12,7 +12,7 @@ class PygameWin:
         'gray': (100, 100, 100),
     }
 
-    def __init__(self, win_width=1000, win_height=600, fps=60, win_name='Ray Tracing Test'):
+    def __init__(self, win_width=1000, win_height=600, fps=60, win_name='Ray Tracing Test', mouse_sensitivity=1):
         self.win_name = win_name
         self.fps = fps
         self.tick = 0
@@ -23,6 +23,9 @@ class PygameWin:
         self.big_font = pygame.font.SysFont('Roboto Mono', 40)
         self.small_font = pygame.font.SysFont('Roboto Mono', 20)
         self.clock = pygame.time.Clock()
+        pygame.mouse.set_visible(False)
+        pygame.event.set_grab(True)
+        self.mouse_sensitivity = mouse_sensitivity
 
         self.game_surface = pygame.Surface((self.win.get_width() - 200, self.win.get_height()))
         self.info_surface = pygame.Surface((self.win.get_width() - self.game_surface.get_width(),
@@ -57,8 +60,11 @@ class PygameWin:
                 player.new_angle -= player.angle_change
             if keys[pygame.K_RIGHT]:
                 player.new_angle += player.angle_change
-
         return True
+
+    def mouse_movement(self, player, dt):
+        if pygame.mouse.get_focused():
+            player.new_angle = pygame.mouse.get_rel()[0] * dt.dt * self.mouse_sensitivity
 
     def draw_on_update(self, player, game_map, rt):
         self.win.fill(self.colors.get('green'))
@@ -99,10 +105,10 @@ class PygameWin:
             x, y = coords
             if tile.blocks_movement:
                 pygame.draw.rect(self.mini_map_surface, self.colors.get('white'),
-                                 pygame.Rect(round(x * tile_size_x), round(y * tile_size_y), round(tile_size_x), round(tile_size_y)))
+                                 pygame.Rect(math.ceil(x * tile_size_x), math.ceil(y * tile_size_y), math.ceil(tile_size_x), math.ceil(tile_size_y)))
             else:
                 pygame.draw.rect(self.mini_map_surface, self.colors.get('black'),
-                                 pygame.Rect(round(x * tile_size_x), round(y * tile_size_y), round(tile_size_x), round(tile_size_y)))
+                                 pygame.Rect(math.ceil(x * tile_size_x), math.ceil(y * tile_size_y), math.ceil(tile_size_x), math.ceil(tile_size_y)))
 
         pygame.draw.rect(self.mini_map_surface, self.colors.get('red'),
                          pygame.Rect(player.x * tile_size_x - tile_size_x / 2,
