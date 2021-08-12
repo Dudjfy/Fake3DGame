@@ -23,15 +23,9 @@ class Player:
             pygame.K_RIGHT: (self.move_distance, 0)
         }
 
-    # def update_movement(self, key):
-    #     self.new_x, self.new_y = self.moves.get(key, (0, 0))
-    #
-    def move(self, dt):
-        self.x = round(self.x + self.new_x * dt.dt, 4)
-        self.y = round(self.y + self.new_y * dt.dt, 4)
+    def move(self, dt, game_map):
+        if not game_map.map.get((int(self.x + self.new_x * dt.dt), int(self.y))).blocks_movement:
+            self.x = round(self.x + self.new_x * dt.dt, 4)
+        if not game_map.map.get((int(self.x), int(self.y + self.new_y * dt.dt))).blocks_movement:
+            self.y = round(self.y + self.new_y * dt.dt, 4)
 
-        # print(self.tick % (fps // self.speed))
-        # self.tick += 1
-        # if self.tick % (fps // self.speed) == 0:
-        #     self.x = round(self.x + self.new_x, 2)
-        #     self.y = round(self.y + self.new_y, 2)

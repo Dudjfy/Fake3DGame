@@ -6,7 +6,7 @@ from gameMap import GameMap
 from player import Player
 from pygameWin import PygameWin
 
-game_map = GameMap(20, 20)
+game_map = GameMap(10, 10)
 # game_map.print_map()
 
 player = Player(game_map.width / 2, game_map.height / 2, 10)
@@ -39,7 +39,7 @@ while game_on:
 
     game_on = py_win.event_handler(player)
 
-    player.move(dt)
+    player.move(dt, game_map)
 
     py_win.draw_on_update(player, game_map)
 

@@ -46,13 +46,6 @@ class PygameWin:
             if keys[pygame.K_d]:
                 player.new_x += player.move_distance
 
-            # if event.type == pygame.KEYDOWN:
-            #     player.update_movement(event.key)
-            #     print('k down')
-            # elif event.type == pygame.KEYUP:
-            #     player.update_movement((0, 0))
-            #     player.tick = 0
-
         return True
 
     def draw_on_update(self, player, game_map):
@@ -84,14 +77,18 @@ class PygameWin:
 
         tile_size_x = self.mini_map_surface.get_width() / game_map.width
         tile_size_y = self.mini_map_surface.get_height() / game_map.height
-        for y, row in enumerate(game_map.map):
-            for x, tile in enumerate(row):
-                if tile.blocks_movement:
-                    pygame.draw.rect(self.mini_map_surface, self.colors.get('white'),
-                                     pygame.Rect(x * tile_size_x, y * tile_size_y, tile_size_x, tile_size_y))
-                else:
-                    pygame.draw.rect(self.mini_map_surface, self.colors.get('black'),
-                                     pygame.Rect(x * tile_size_x, y * tile_size_y, tile_size_x, tile_size_y))
 
-        pygame.draw.circle(self.mini_map_surface, self.colors.get('red'),
-                           (player.x * tile_size_x, player.y *  tile_size_y), 5)
+        for coords, tile in game_map.map.items():
+            x, y = coords
+            if tile.blocks_movement:
+                pygame.draw.rect(self.mini_map_surface, self.colors.get('white'),
+                                 pygame.Rect(x * tile_size_x, y * tile_size_y, tile_size_x, tile_size_y))
+            else:
+                pygame.draw.rect(self.mini_map_surface, self.colors.get('black'),
+                                 pygame.Rect(x * tile_size_x, y * tile_size_y, tile_size_x, tile_size_y))
+
+        pygame.draw.rect(self.mini_map_surface, self.colors.get('red'),
+                         pygame.Rect(player.x * tile_size_x - tile_size_x / 2,
+                                     player.y * tile_size_y - tile_size_x / 2,
+                                     tile_size_x,
+                                     tile_size_y))
