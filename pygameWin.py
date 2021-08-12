@@ -1,3 +1,5 @@
+import math
+
 import pygame
 
 
@@ -36,6 +38,7 @@ class PygameWin:
 
             player.new_x = 0
             player.new_y = 0
+            player.new_angle = 0
 
             if keys[pygame.K_w] or keys[pygame.K_UP]:
                 player.new_y -= player.move_distance
@@ -46,13 +49,19 @@ class PygameWin:
             if keys[pygame.K_d]:
                 player.new_x += player.move_distance
 
+            if keys[pygame.K_LEFT]:
+                player.new_angle -= player.angle_change
+            if keys[pygame.K_RIGHT]:
+                player.new_angle += player.angle_change
+
         return True
 
-    def draw_on_update(self, player, game_map):
+    def draw_on_update(self, player, game_map, rt):
         self.win.fill(self.colors.get('green'))
         self.game_surface.fill(self.colors.get('black'))
         self.info_surface.fill(self.colors.get('gray'))
 
+        self.draw_ray_traced_lines(rt)
         self.draw_info(player)
         self.draw_mini_map(player, game_map)
 
@@ -64,16 +73,18 @@ class PygameWin:
         pygame.display.update()
 
     def draw_info(self, player):
-        x_text = self.small_font.render('X: {:}'.format(player.x), True, self.colors.get('white'))
-        y_text = self.small_font.render('Y: {:}'.format(player.y), True, self.colors.get('white'))
+        x_text = self.small_font.render('X: {:.4f}'.format(player.x), True, self.colors.get('white'))
+        y_text = self.small_font.render('Y: {:.4f}'.format(player.y), True, self.colors.get('white'))
+        angle_text = self.small_font.render('Angle: {:.4f}'.format(player.angle), True, self.colors.get('white'))
         fps_text = self.small_font.render('FPS: {:.2f}'.format(self.clock.get_fps()), True, self.colors.get('white'))
 
         self.info_surface.blit(fps_text, (20, 20))
         self.info_surface.blit(x_text, (20, 60))
         self.info_surface.blit(y_text, (20, 100))
+        self.info_surface.blit(angle_text, (20, 140))
 
     def draw_mini_map(self, player, game_map):
-        self.mini_map_surface.fill(self.colors.get('red'))
+        self.mini_map_surface.fill(self.colors.get('green'))
 
         tile_size_x = self.mini_map_surface.get_width() / game_map.width
         tile_size_y = self.mini_map_surface.get_height() / game_map.height
@@ -92,3 +103,17 @@ class PygameWin:
                                      player.y * tile_size_y - tile_size_x / 2,
                                      tile_size_x,
                                      tile_size_y))
+        pygame.draw.line(self.mini_map_surface,
+                         self.colors.get('green'),
+                         (player.x * tile_size_x, player.y * tile_size_y),
+                         (int((player.x * tile_size_x + 10 * math.cos(math.radians(player.angle)))),
+                          int((player.y * tile_size_y + 10 * math.sin(math.radians(player.angle))))))
+
+    def draw_ray_traced_lines(self, rt):
+        for i, distance in enumerate(rt.distances):
+            if distance <= rt.radius:
+                line_len = (self.game_surface.get_height() - 100) - (distance / rt.radius) * (self.game_surface.get_height() - 200)
+                pygame.draw.line(self.game_surface,
+                                 self.colors.get('white'),
+                                 (i, int((self.game_surface.get_height() / 2) - (line_len / 2))),
+                                 (i, int((self.game_surface.get_height() / 2) + (line_len / 2))))

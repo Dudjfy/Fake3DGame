@@ -1,13 +1,19 @@
+import math
+
 import pygame
 
 
 class Player:
-    def __init__(self, x, y, vel=1):
+    def __init__(self, x, y, vel=1, fov=90, angle=0, angle_change=1):
         self.x = x
         self.y = y
+        self.fov = fov
+        self.angle = angle
+        self.angle_change = angle_change
 
         self.new_x = 0
         self.new_y = 0
+        self.new_angle = 0
 
         self.move_distance = vel
         self.tick = 0
@@ -29,3 +35,5 @@ class Player:
         if not game_map.map.get((int(self.x), int(self.y + self.new_y * dt.dt))).blocks_movement:
             self.y = round(self.y + self.new_y * dt.dt, 4)
 
+    def change_angle(self, dt):
+        self.angle = round(self.angle + self.new_angle * dt.dt, 4)

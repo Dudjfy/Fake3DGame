@@ -2,14 +2,17 @@ import time
 
 import pygame as pygame
 
-from gameMap import GameMap
+from gameMap import GameMap, Tile
 from player import Player
 from pygameWin import PygameWin
+from rayTracing import RayTracing
 
-game_map = GameMap(10, 10)
+game_map = GameMap(20, 20)
+game_map.create_map_from_file()
+# game_map.map[(5, 5)] = Tile('#', True)
 # game_map.print_map()
 
-player = Player(game_map.width / 2, game_map.height / 2, 10)
+player = Player(game_map.width / 2, game_map.height / 2, vel=10, angle_change=100)
 
 py_win = PygameWin(win_width=1000, win_height=600, fps=60, win_name='Ray Tracing Test')
 
@@ -30,6 +33,8 @@ class DeltaTime:
 
 
 dt = DeltaTime()
+rt = RayTracing(py_win.game_surface.get_width(), 100, 10)
+
 
 game_on = True
 while game_on:
@@ -40,6 +45,9 @@ while game_on:
     game_on = py_win.event_handler(player)
 
     player.move(dt, game_map)
+    player.change_angle(dt)
 
-    py_win.draw_on_update(player, game_map)
+    rt.calc_distances(player, game_map)
+
+    py_win.draw_on_update(player, game_map, rt)
 

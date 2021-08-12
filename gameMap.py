@@ -17,7 +17,19 @@ class GameMap:
         self.height = height
 
         self.map = {}
-        self.create_empty_map_with_borders()
+        # self.create_empty_map_with_borders()
+
+    def create_map_from_file(self):
+        file = open('map.txt', 'r')
+
+        for y, row in enumerate(file):
+            for x, tile in enumerate(row):
+                if tile == '#':
+                    self.map[(x, y)] = Tile('#', True)
+                elif tile == ' ':
+                    self.map[(x, y)] = Tile(' ', False)
+
+        file.close()
 
     def create_empty_map_with_borders(self):
         for y in range(self.height):
