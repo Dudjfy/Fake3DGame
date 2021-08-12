@@ -21,7 +21,7 @@ class PygameWin:
         pygame.display.set_caption(self.win_name)
         pygame.font.init()
         self.big_font = pygame.font.SysFont('Roboto Mono', 40)
-        self.small_font = pygame.font.SysFont('Roboto Mono', 30)
+        self.small_font = pygame.font.SysFont('Roboto Mono', 20)
         self.clock = pygame.time.Clock()
 
         self.game_surface = pygame.Surface((self.win.get_width() - 200, self.win.get_height()))
@@ -29,7 +29,7 @@ class PygameWin:
                                             self.win.get_height()))
         self.mini_map_surface = pygame.Surface((self.info_surface.get_width(), self.info_surface.get_width()))
 
-    def event_handler(self, player):
+    def event_handler(self, player, dt):
         for event in pygame.event.get():
             if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 return False
@@ -41,13 +41,17 @@ class PygameWin:
             player.new_angle = 0
 
             if keys[pygame.K_w] or keys[pygame.K_UP]:
-                player.new_y -= player.move_distance
+                player.new_x = math.cos(player.angle) * player.move_distance * dt.dt
+                player.new_y = math.sin(player.angle) * player.move_distance * dt.dt
             if keys[pygame.K_s] or keys[pygame.K_DOWN]:
-                player.new_y += player.move_distance
+                player.new_x = -math.cos(player.angle) * player.move_distance * dt.dt
+                player.new_y = -math.sin(player.angle) * player.move_distance * dt.dt
             if keys[pygame.K_a]:
-                player.new_x -= player.move_distance
+                player.new_x = math.cos(player.angle - math.pi / 2) * player.move_distance * dt.dt
+                player.new_y = math.sin(player.angle - math.pi / 2) * player.move_distance * dt.dt
             if keys[pygame.K_d]:
-                player.new_x += player.move_distance
+                player.new_x = math.cos(player.angle + math.pi / 2) * player.move_distance * dt.dt
+                player.new_y = math.sin(player.angle + math.pi / 2) * player.move_distance * dt.dt
 
             if keys[pygame.K_LEFT]:
                 player.new_angle -= player.angle_change
@@ -73,15 +77,17 @@ class PygameWin:
         pygame.display.update()
 
     def draw_info(self, player):
-        x_text = self.small_font.render('X: {:.4f}'.format(player.x), True, self.colors.get('white'))
-        y_text = self.small_font.render('Y: {:.4f}'.format(player.y), True, self.colors.get('white'))
-        angle_text = self.small_font.render('Angle: {:.4f}'.format(player.angle), True, self.colors.get('white'))
+        x_text = self.small_font.render('X: {:.2f}'.format(player.x), True, self.colors.get('white'))
+        y_text = self.small_font.render('Y: {:.2f}'.format(player.y), True, self.colors.get('white'))
+        angle_text = self.small_font.render('Angle: {:.0f}'
+                                            .format(abs(math.degrees(player.angle) % 360), player.angle),
+                                            True, self.colors.get('white'))
         fps_text = self.small_font.render('FPS: {:.2f}'.format(self.clock.get_fps()), True, self.colors.get('white'))
 
         self.info_surface.blit(fps_text, (20, 20))
-        self.info_surface.blit(x_text, (20, 60))
-        self.info_surface.blit(y_text, (20, 100))
-        self.info_surface.blit(angle_text, (20, 140))
+        self.info_surface.blit(x_text, (20, 40))
+        self.info_surface.blit(y_text, (20, 60))
+        self.info_surface.blit(angle_text, (20, 80))
 
     def draw_mini_map(self, player, game_map):
         self.mini_map_surface.fill(self.colors.get('green'))
@@ -93,10 +99,10 @@ class PygameWin:
             x, y = coords
             if tile.blocks_movement:
                 pygame.draw.rect(self.mini_map_surface, self.colors.get('white'),
-                                 pygame.Rect(x * tile_size_x, y * tile_size_y, tile_size_x, tile_size_y))
+                                 pygame.Rect(round(x * tile_size_x), round(y * tile_size_y), round(tile_size_x), round(tile_size_y)))
             else:
                 pygame.draw.rect(self.mini_map_surface, self.colors.get('black'),
-                                 pygame.Rect(x * tile_size_x, y * tile_size_y, tile_size_x, tile_size_y))
+                                 pygame.Rect(round(x * tile_size_x), round(y * tile_size_y), round(tile_size_x), round(tile_size_y)))
 
         pygame.draw.rect(self.mini_map_surface, self.colors.get('red'),
                          pygame.Rect(player.x * tile_size_x - tile_size_x / 2,
@@ -106,14 +112,16 @@ class PygameWin:
         pygame.draw.line(self.mini_map_surface,
                          self.colors.get('green'),
                          (player.x * tile_size_x, player.y * tile_size_y),
-                         (int((player.x * tile_size_x + 10 * math.cos(math.radians(player.angle)))),
-                          int((player.y * tile_size_y + 10 * math.sin(math.radians(player.angle))))))
+                         (int((player.x * tile_size_x + 10 * math.cos(player.angle))),
+                          int((player.y * tile_size_y + 10 * math.sin(player.angle)))))
 
     def draw_ray_traced_lines(self, rt):
         for i, distance in enumerate(rt.distances):
             if distance <= rt.radius:
-                line_len = (self.game_surface.get_height() - 100) - (distance / rt.radius) * (self.game_surface.get_height() - 200)
+                line_start_y = (self.game_surface.get_height() / 2) - (self.game_surface.get_height() / distance)
+                line_end_y = self.game_surface.get_height() - line_start_y
+                shading = 255 - int((distance / rt.radius) * 255)
                 pygame.draw.line(self.game_surface,
-                                 self.colors.get('white'),
-                                 (i, int((self.game_surface.get_height() / 2) - (line_len / 2))),
-                                 (i, int((self.game_surface.get_height() / 2) + (line_len / 2))))
+                                 (shading, shading, shading),
+                                 (i, line_start_y),
+                                 (i, line_end_y))

@@ -1,3 +1,4 @@
+import math
 import time
 
 import pygame as pygame
@@ -7,12 +8,13 @@ from player import Player
 from pygameWin import PygameWin
 from rayTracing import RayTracing
 
-game_map = GameMap(20, 20)
-game_map.create_map_from_file()
-# game_map.map[(5, 5)] = Tile('#', True)
+game_map = GameMap(17, 17)
+# game_map.create_map_from_file()
+game_map.create_empty_map_with_borders()
+game_map.map[(5, 5)] = Tile('#', True)
 # game_map.print_map()
 
-player = Player(game_map.width / 2, game_map.height / 2, vel=10, angle_change=100)
+player = Player(game_map.width / 2, game_map.height / 2, vel=10, fov=math.pi / 2, angle_change=(math.pi))
 
 py_win = PygameWin(win_width=1000, win_height=600, fps=60, win_name='Ray Tracing Test')
 
@@ -42,7 +44,7 @@ while game_on:
 
     dt.new_dt()
 
-    game_on = py_win.event_handler(player)
+    game_on = py_win.event_handler(player, dt)
 
     player.move(dt, game_map)
     player.change_angle(dt)

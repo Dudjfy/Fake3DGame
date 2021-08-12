@@ -4,7 +4,7 @@ import pygame
 
 
 class Player:
-    def __init__(self, x, y, vel=1, fov=90, angle=0, angle_change=1):
+    def __init__(self, x, y, vel=1, fov=(math.pi / 2), angle=0, angle_change=1):
         self.x = x
         self.y = y
         self.fov = fov
@@ -30,10 +30,10 @@ class Player:
         }
 
     def move(self, dt, game_map):
-        if not game_map.map.get((int(self.x + self.new_x * dt.dt), int(self.y))).blocks_movement:
-            self.x = round(self.x + self.new_x * dt.dt, 4)
-        if not game_map.map.get((int(self.x), int(self.y + self.new_y * dt.dt))).blocks_movement:
-            self.y = round(self.y + self.new_y * dt.dt, 4)
+        if not game_map.map.get((int(self.x + self.new_x), int(self.y))).blocks_movement:
+            self.x += self.new_x
+        if not game_map.map.get((int(self.x), int(self.y + self.new_y))).blocks_movement:
+            self.y += self.new_y
 
     def change_angle(self, dt):
         self.angle = round(self.angle + self.new_angle * dt.dt, 4)

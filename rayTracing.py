@@ -14,7 +14,7 @@ class RayTracing:
 
     def calc_distances(self, player, game_map):
         for ray in range(self.rays):
-            ray_angle = math.radians((player.angle - player.fov / 2) + (ray / self.rays) * player.fov)
+            ray_angle = (player.angle - player.fov / 2) + (ray / self.rays) * player.fov
             x = math.cos(ray_angle)
             y = math.sin(ray_angle)
             for step in range(self.steps):

@@ -28,6 +28,8 @@ class GameMap:
                     self.map[(x, y)] = Tile('#', True)
                 elif tile == ' ':
                     self.map[(x, y)] = Tile(' ', False)
+                self.height = x + 1
+            self.width = y + 1
 
         file.close()
 
