@@ -8,7 +8,9 @@ class PygameWin:
         'white': (255, 255, 255),
         'green': (0, 255, 0),
         'red': (255, 0, 0),
+        'blue': (0, 0, 255),
         'black': (0, 0, 0),
+        'yellow': (255,255,0),
         'gray': (100, 100, 100),
     }
 
@@ -35,6 +37,13 @@ class PygameWin:
         self.info_surface = pygame.Surface((self.win.get_width() - self.game_surface.get_width(),
                                             self.win.get_height()))
         self.mini_map_surface = pygame.Surface((self.info_surface.get_width(), self.info_surface.get_width()))
+
+        # self.wall_sprite = pygame.image.load('wall_16x16.png')
+        # self.wall_sprite = pygame.image.load('bricks_16x16.png')
+        # self.wall_sprite = pygame.image.load('bricks_64x64.png')
+        self.wall_sprite = pygame.image.load('wall_256x265.png')
+        # self.wall_sprite = pygame.image.load('gray_wall_256x256.png')
+        # print(self.wall_sprite.get_at((0, 0)), self.wall_sprite.get_at((1, 0)))
 
     def event_handler(self, player, dt):
         for event in pygame.event.get():
@@ -73,14 +82,18 @@ class PygameWin:
         else:
             player.new_angle = pygame.mouse.get_rel()[0] * dt.dt * self.mouse_sensitivity
 
-    def draw_on_update(self, player, game_map, rt):
+    def draw_on_update(self, player, game_map, rt, game_height_factor):
         self.win.fill(self.colors.get('green'))
         self.game_surface.fill(self.colors.get('black'))
+        # self.game_surface.fill(self.colors.get('blue'), pygame.Rect(0,
+        #                                                             0,
+        #                                                             self.game_surface.get_width(),
+        #                                                             (self.game_surface.get_height() / 2)))
         self.info_surface.fill(self.colors.get('gray'))
 
-        self.draw_ray_traced_lines(rt)
+        self.draw_ray_traced_lines(rt, game_height_factor)
         self.draw_info(player)
-        self.draw_mini_map(player, game_map)
+        self.draw_mini_map(player, game_map, rt)
 
         self.win.blit(self.game_surface, (0, 0))
         self.info_surface.blit(self.mini_map_surface,
@@ -90,8 +103,8 @@ class PygameWin:
         pygame.display.update()
 
     def draw_info(self, player):
-        x_text = self.small_font.render('X: {:.2f}'.format(player.x), True, self.colors.get('white'))
-        y_text = self.small_font.render('Y: {:.2f}'.format(player.y), True, self.colors.get('white'))
+        x_text = self.small_font.render('X: {:.2f}'.format(player.pos.x), True, self.colors.get('white'))
+        y_text = self.small_font.render('Y: {:.2f}'.format(player.pos.y), True, self.colors.get('white'))
         angle_text = self.small_font.render('Angle: {:.0f}'
                                             .format(abs(math.degrees(player.angle) % 360), player.angle),
                                             True, self.colors.get('white'))
@@ -102,7 +115,7 @@ class PygameWin:
         self.info_surface.blit(y_text, (20, 60))
         self.info_surface.blit(angle_text, (20, 80))
 
-    def draw_mini_map(self, player, game_map):
+    def draw_mini_map(self, player, game_map, rt):
         self.mini_map_surface.fill(self.colors.get('green'))
 
         tile_size_x = self.mini_map_surface.get_width() / game_map.width
@@ -112,29 +125,52 @@ class PygameWin:
             x, y = coords
             if tile.blocks_movement:
                 pygame.draw.rect(self.mini_map_surface, self.colors.get('white'),
-                                 pygame.Rect(math.ceil(x * tile_size_x), math.ceil(y * tile_size_y), math.ceil(tile_size_x), math.ceil(tile_size_y)))
+                                 pygame.Rect(math.ceil(x * tile_size_x),
+                                             math.ceil(y * tile_size_y),
+                                             math.ceil(tile_size_x),
+                                             math.ceil(tile_size_y)))
             else:
                 pygame.draw.rect(self.mini_map_surface, self.colors.get('black'),
-                                 pygame.Rect(math.ceil(x * tile_size_x), math.ceil(y * tile_size_y), math.ceil(tile_size_x), math.ceil(tile_size_y)))
+                                 pygame.Rect(math.ceil(x * tile_size_x),
+                                             math.ceil(y * tile_size_y),
+                                             math.ceil(tile_size_x),
+                                             math.ceil(tile_size_y)))
 
         pygame.draw.rect(self.mini_map_surface, self.colors.get('red'),
-                         pygame.Rect(player.x * tile_size_x - tile_size_x / 2,
-                                     player.y * tile_size_y - tile_size_x / 2,
+                         pygame.Rect(player.pos.x * tile_size_x - tile_size_x / 2,
+                                     player.pos.y * tile_size_y - tile_size_y / 2,
                                      tile_size_x,
                                      tile_size_y))
         pygame.draw.line(self.mini_map_surface,
                          self.colors.get('green'),
-                         (player.x * tile_size_x, player.y * tile_size_y),
-                         (int((player.x * tile_size_x + 10 * math.cos(player.angle))),
-                          int((player.y * tile_size_y + 10 * math.sin(player.angle)))))
+                         (player.pos.x * tile_size_x, player.pos.y * tile_size_y),
+                         (int((player.pos.x * tile_size_x + 10 * math.cos(player.angle))),
+                          int((player.pos.y * tile_size_y + 10 * math.sin(player.angle)))))
 
-    def draw_ray_traced_lines(self, rt):
-        for i, distance in enumerate(rt.distances):
-            if distance <= rt.radius:
-                line_start_y = (self.game_surface.get_height() / 2) - (self.game_surface.get_height() / distance)
+        for distance in rt.distances:
+            self.mini_map_surface.set_at((int(distance.vector.x * tile_size_x), int(distance.vector.y * tile_size_y)),
+                                         self.colors.get('green'))
+
+
+    def draw_ray_traced_lines(self, rt, game_height_factor):
+        for x, distance in enumerate(rt.distances):
+            # i = i * game_px_width
+            if distance.distance <= rt.radius:
+                line_start_y = (self.game_surface.get_height() / 2) - \
+                               (self.game_surface.get_height() / distance.distance) / game_height_factor
                 line_end_y = self.game_surface.get_height() - line_start_y
-                shading = 255 - int((distance / rt.radius) * 255)
+                shading = 255 - int((distance.distance / rt.radius) * 255)
+
+                # line_len = int(line_end_y - line_start_y)
+                #
+                # for y in range(line_len):
+                #     sample_x = int(distance.sample_x_factor * self.wall_sprite.get_width())
+                #     sample_y = int((y / line_len) * self.wall_sprite.get_height())
+                #     color = self.wall_sprite.get_at((sample_x, sample_y))
+                #
+                #     self.game_surface.set_at((x, int(line_start_y + y)), color)
+
                 pygame.draw.line(self.game_surface,
                                  (shading, shading, shading),
-                                 (i, line_start_y),
-                                 (i, line_end_y))
+                                 (x, line_start_y),
+                                 (x, line_end_y))

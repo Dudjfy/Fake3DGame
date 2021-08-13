@@ -37,9 +37,9 @@ class GameMap:
             rand_x = random.randint(0, self.width - 1)
             rand_y = random.randint(0, self.height - 1)
             coords = (rand_x, rand_y)
-            print(coords, self.map.get(coords))
             if not (self.map.get(coords)).blocks_movement:
                 return coords
+
 
 class Tile:
     def __init__(self, sign='?', blocks_movement=False):
