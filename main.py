@@ -7,7 +7,7 @@ from gameMap import GameMap, Tile
 from player import Player
 from pygameWin import PygameWin
 from rayTracing import RayTracing
-from line_profiler_pycharm import profile
+# from line_profiler_pycharm import profile
 
 # @profile
 def main():
@@ -32,7 +32,7 @@ def main():
     """         Window presets          """
 
     # Classic
-    w, h, i_w = 1000, 600, 600
+    w, h, i_w = 1000, 600, 200
 
     # Info bar and mini map
     # w, h, i_w = 1000, 300, 200
@@ -93,8 +93,8 @@ def main():
         player.move(dt, game_map)
         player.change_angle(dt)
 
-        rt.calc_distances_dda(player, game_map)
-        # rt.calc_distances(player, game_map)
+        # rt.calc_distances_dda(player, game_map)
+        rt.calc_distances(player, game_map)
 
         py_win.draw_on_update(player, game_map, rt, game_height_factor)
 

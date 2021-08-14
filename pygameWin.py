@@ -38,10 +38,10 @@ class PygameWin:
                                             self.win.get_height()))
         self.mini_map_surface = pygame.Surface((self.info_surface.get_width(), self.info_surface.get_width()))
 
-        # self.wall_sprite = pygame.image.load('wall_16x16.png')
+        self.wall_sprite = pygame.image.load('wall_16x16.png')
         # self.wall_sprite = pygame.image.load('bricks_16x16.png')
         # self.wall_sprite = pygame.image.load('bricks_64x64.png')
-        self.wall_sprite = pygame.image.load('wall_256x265.png')
+        # self.wall_sprite = pygame.image.load('wall_256x265.png')
         # self.wall_sprite = pygame.image.load('gray_wall_256x256.png')
         # print(self.wall_sprite.get_at((0, 0)), self.wall_sprite.get_at((1, 0)))
 
@@ -147,9 +147,9 @@ class PygameWin:
                          (int((player.pos.x * tile_size_x + 10 * math.cos(player.angle))),
                           int((player.pos.y * tile_size_y + 10 * math.sin(player.angle)))))
 
-        for distance in rt.distances:
-            self.mini_map_surface.set_at((int(distance.vector.x * tile_size_x), int(distance.vector.y * tile_size_y)),
-                                         self.colors.get('green'))
+        # for distance in rt.distances:
+        #     self.mini_map_surface.set_at((int(distance.vector.x * tile_size_x), int(distance.vector.y * tile_size_y)),
+        #                                  self.colors.get('green'))
 
 
     def draw_ray_traced_lines(self, rt, game_height_factor):
@@ -159,18 +159,18 @@ class PygameWin:
                 line_start_y = (self.game_surface.get_height() / 2) - \
                                (self.game_surface.get_height() / distance.distance) / game_height_factor
                 line_end_y = self.game_surface.get_height() - line_start_y
-                shading = 255 - int((distance.distance / rt.radius) * 255)
+                # shading = 255 - int((distance.distance / rt.radius) * 255)
 
-                # line_len = int(line_end_y - line_start_y)
-                #
-                # for y in range(line_len):
-                #     sample_x = int(distance.sample_x_factor * self.wall_sprite.get_width())
-                #     sample_y = int((y / line_len) * self.wall_sprite.get_height())
-                #     color = self.wall_sprite.get_at((sample_x, sample_y))
-                #
-                #     self.game_surface.set_at((x, int(line_start_y + y)), color)
+                line_len = int(line_end_y - line_start_y)
 
-                pygame.draw.line(self.game_surface,
-                                 (shading, shading, shading),
-                                 (x, line_start_y),
-                                 (x, line_end_y))
+                for y in range(line_len):
+                    sample_x = int(distance.sample_x_factor * self.wall_sprite.get_width())
+                    sample_y = int((y / line_len) * self.wall_sprite.get_height())
+                    color = self.wall_sprite.get_at((sample_x, sample_y))
+
+                    self.game_surface.set_at((x, int(line_start_y + y)), color)
+
+                # pygame.draw.line(self.game_surface,
+                #                  (shading, shading, shading),
+                #                  (x, line_start_y),
+                #                  (x, line_end_y))
