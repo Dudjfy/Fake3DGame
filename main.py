@@ -17,13 +17,13 @@ def main():
     # game_map.create_empty_map_with_borders()
     # game_map.map[(5, 5)] = Tile('#', True)
 
-    # p_x = game_map.height / 2
-    # p_y = game_map.height / 2
+    p_x = (game_map.height + 1) / 2
+    p_y = (game_map.height + 1) / 2
 
     # p_x = 78
     # p_y = 19
 
-    p_x, p_y = game_map.return_random_empty_spot()
+    # p_x, p_y = game_map.return_random_empty_spot()
 
     game_height_factor = 2
 

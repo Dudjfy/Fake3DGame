@@ -17,17 +17,6 @@ class Player:
         self.move_distance = vel
         self.tick = 0
 
-        self.moves = {
-            pygame.K_w: (0, -self.move_distance),
-            pygame.K_UP: (0, -self.move_distance),
-            pygame.K_s: (0, self.move_distance),
-            pygame.K_DOWN: (0, self.move_distance),
-            pygame.K_a: (-self.move_distance, 0),
-            pygame.K_LEFT: (-self.move_distance, 0),
-            pygame.K_d: (self.move_distance, 0),
-            pygame.K_RIGHT: (self.move_distance, 0)
-        }
-
     def move(self, dt, game_map):
         new_x_test = game_map.map.get((int(self.pos.x + self.new_x), int(self.pos.y)))
         if new_x_test != None and not new_x_test.blocks_movement:
