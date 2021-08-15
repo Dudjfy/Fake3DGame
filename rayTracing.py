@@ -5,63 +5,76 @@ import pygame
 
 
 class RayTracing:
-    def __init__(self, rays, steps, radius=10):
+    def __init__(self, rays, steps, player, radius=10):
         self.rays = rays
         self.steps = steps
         self.radius = radius
         self.step_size = radius / steps
 
         self.distances = []
-        for item in range(rays):
-            self.distances.append(Distance(self.radius + 1, 0))
         # for item in range(rays):
-        #     self.distances.append(Distance(pygame.Vector2(100, 100)))
+        #     self.distances.append(Distance(player.pos + self.radius + 1, 0))
+        for item in range(rays):
+            self.distances.append(Distance(pygame.math.Vector2(player.pos.x + self.radius + 1,
+                                                               player.pos.y + self.radius + 1),
+                                           player.pos))
 
-    # def calc_distances_dda(self, player, game_map):
-    #     start_pos = player.pos
-    #     for ray in range(self.rays):
-    #         ray_angle = (player.angle - player.fov / 2) + (ray / self.rays) * player.fov
-    #         x_end = math.cos(ray_angle) * self.radius
-    #         y_end = math.sin(ray_angle) * self.radius
-    #         end_pos = (pygame.math.Vector2(x_end, y_end) - start_pos).normalize()
-    #
-    #         step_size = pygame.math.Vector2(math.sqrt(1 + (end_pos.y / end_pos.x) * (end_pos.y / end_pos.x)),
-    #                                         math.sqrt(1 + (end_pos.x / end_pos.y) * (end_pos.x / end_pos.y)))
-    #         map_coords = pygame.math.Vector2(int(start_pos.x), int(start_pos.y))
-    #
-    #         ray_len = pygame.math.Vector2()
-    #         step = pygame.math.Vector2()
-    #
-    #         if end_pos.x < 0:
-    #             step.x = -1
-    #             ray_len.x = (start_pos.x - map_coords.x) * step_size.x
-    #         else:
-    #             step.x = 1
-    #             ray_len.x = ((map_coords.x + 1) - start_pos.x) * step_size.x
-    #
-    #         if end_pos.y < 0:
-    #             step.y = -1
-    #             ray_len.y = (start_pos.y - map_coords.y) * step_size.y
-    #         else:
-    #             step.y = 1
-    #             ray_len.x = ((map_coords.y + 1) - start_pos.y) * step_size.y
-    #
-    #         hit_tile = False
-    #         distance = 0
-    #         while (not hit_tile) and (distance < self.radius):
-    #             if ray_len.x < ray_len.y:
-    #                 map_coords.x += step.x
-    #                 distance = ray_len.x
-    #                 ray_len.x += step_size.x
-    #             else:
-    #                 map_coords.y += step.y
-    #                 distance = ray_len.y
-    #                 ray_len.y += step_size.y
-    #
-    #             if 0 <= map_coords.x < game_map.width and 0 <= map_coords.y < game_map.height:
-    #                 if game_map.map.get((map_coords.x, map_coords.y)).blocks_movement:
-    #                     hit_tile = True
-    #                     self.distances[ray] = Distance(start_pos + end_pos * distance)
+    def calc_distances_dda(self, player, game_map):
+        start_pos = player.pos
+        for ray in range(self.rays):
+            ray_angle = (player.angle - player.fov / 2) + (ray / self.rays) * player.fov
+            x_end = math.cos(ray_angle) * self.radius
+            y_end = math.sin(ray_angle) * self.radius
+            end_pos_norm = (pygame.math.Vector2(x_end, y_end)).normalize()
+
+            if end_pos_norm.x == 0 or end_pos_norm.y == 0:
+                self.distances[ray] = Distance(pygame.math.Vector2(start_pos.x + self.radius + 1,
+                                                                   start_pos.y + self.radius + 1),
+                                               start_pos)
+                continue
+
+            step_size = pygame.math.Vector2(math.sqrt(1 + (end_pos_norm.y / end_pos_norm.x) ** 2),
+                                            math.sqrt(1 + (end_pos_norm.x / end_pos_norm.y) ** 2))
+
+            map_coords = pygame.math.Vector2(int(start_pos.x), int(start_pos.y))
+            ray_len = pygame.math.Vector2()
+            step = pygame.math.Vector2()
+            if end_pos_norm.x < 0:
+                step.x = -1
+                ray_len.x = (start_pos.x - map_coords.x) * step_size.x
+            else:
+                step.x = 1
+                ray_len.x = ((map_coords.x + 1) - start_pos.x) * step_size.x
+
+            if end_pos_norm.y < 0:
+                step.y = -1
+                ray_len.y = (start_pos.y - map_coords.y) * step_size.y
+            else:
+                step.y = 1
+                ray_len.y = ((map_coords.y + 1) - start_pos.y) * step_size.y
+
+            hit_tile = False
+            distance = 0
+            while (not hit_tile) and (distance < self.radius):
+                if ray_len.x < ray_len.y:
+                    map_coords.x += step.x
+                    distance = ray_len.x
+                    ray_len.x += step_size.x
+                else:
+                    map_coords.y += step.y
+                    distance = ray_len.y
+                    ray_len.y += step_size.y
+
+                if 0 <= map_coords.x < game_map.width and 0 <= map_coords.y < game_map.height:
+                    if game_map.map.get((map_coords.x, map_coords.y)).blocks_movement:
+                        hit_tile = True
+
+            if hit_tile:
+                self.distances[ray] = Distance(start_pos + end_pos_norm * distance, start_pos)
+            else:
+                self.distances[ray] = Distance(pygame.math.Vector2(start_pos.x + self.radius + 1,
+                                                                   start_pos.y + self.radius + 1),
+                                               start_pos)
 
 
     # @profile
@@ -76,7 +89,7 @@ class RayTracing:
                 coords = (int(float_x), int(float_y))
                 tile = game_map.map.get(coords)
                 if tile == None:
-                    self.distances[ray] = Distance(self.radius + 1, 0)
+                    self.distances[ray] = Distance_old(self.radius + 1, 0)
                     break
                 elif tile.blocks_movement:
                     tile_x, tile_y = coords
@@ -105,20 +118,21 @@ class RayTracing:
                     # if math.pi + math.pi / 4 <= atan_angle < -math.pi / 2 + math.pi / 4:
                     #     sample_x = float_y - tile_y
 
-                    self.distances[ray] = Distance(self.step_size * step, sample_x)
+                    self.distances[ray] = Distance_old(self.step_size * step, sample_x)
                     break
             else:
-                self.distances[ray] = Distance(self.radius + 1, 0)
+                self.distances[ray] = Distance_old(self.radius + 1, 0)
 
 
-class Distance:
+class Distance_old:
     def __init__(self, distance, sample_x_factor):
         self.distance = distance
         self.sample_x_factor = sample_x_factor
 
-# class Distance:
-#     def __init__(self, vector):
-#         self.vector = vector
-#
-#         self.distance = self.vector.length()
-#         self.sample_x_factor = sample_x_factor
+class Distance:
+    def __init__(self, vector, start_pos):
+        self.distance = (vector - start_pos).length()
+
+        self.vector = vector
+
+        # self.sample_x_factor = sample_x_factor
