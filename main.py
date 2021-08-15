@@ -44,7 +44,7 @@ def main():
     # w, h, i_w = 1920, 1080, 400
 
     # Full screen smaller info
-    # w, h, i_w = 1920, 1080, 200
+    w, h, i_w = 1920, 1080, 200
 
     # Full screen no info
     # w, h, i_w = 1920, 1080, 0
