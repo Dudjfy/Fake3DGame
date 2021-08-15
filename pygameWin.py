@@ -1,5 +1,7 @@
 import math
 
+
+from line_profiler_pycharm import profile
 import pygame
 
 
@@ -14,6 +16,7 @@ class PygameWin:
         'gray': (100, 100, 100),
     }
 
+    @profile
     def __init__(self, win_width=1000, win_height=600, fps=60, win_name='Ray Tracing Test',
                  mouse_sensitivity=0.1, arrows_sensitivity=2, info_width=200):
         self.win_name = win_name
@@ -159,18 +162,18 @@ class PygameWin:
                 line_start_y = (self.game_surface.get_height() / 2) - \
                                (self.game_surface.get_height() / distance.distance) / game_height_factor
                 line_end_y = self.game_surface.get_height() - line_start_y
-                shading = 255 - int((distance.distance / rt.radius) * 255)
+                # shading = 255 - int((distance.distance / rt.radius) * 255)
 
-                # line_len = int(line_end_y - line_start_y)
-                #
-                # for y in range(line_len):
-                #     sample_x = int(distance.sample_x_factor * self.wall_sprite.get_width())
-                #     sample_y = int((y / line_len) * self.wall_sprite.get_height())
-                #     color = self.wall_sprite.get_at((sample_x, sample_y))
-                #
-                #     self.game_surface.set_at((x, int(line_start_y + y)), color)
+                line_len = int(line_end_y - line_start_y)
 
-                pygame.draw.line(self.game_surface,
-                                 (shading, shading, shading),
-                                 (x, line_start_y),
-                                 (x, line_end_y))
+                for y in range(line_len):
+                    sample_x = int(distance.sample_x * self.wall_sprite.get_width())
+                    sample_y = int((y / line_len) * self.wall_sprite.get_height())
+                    color = self.wall_sprite.get_at((sample_x, sample_y))
+
+                    self.game_surface.set_at((x, int(line_start_y + y)), color)
+
+                # pygame.draw.line(self.game_surface,
+                #                  (shading, shading, shading),
+                #                  (x, line_start_y),
+                #                  (x, line_end_y))

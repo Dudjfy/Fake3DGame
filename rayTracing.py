@@ -1,7 +1,7 @@
 import math
 
 import pygame
-# from line_profiler_pycharm import profile
+from line_profiler_pycharm import profile
 
 
 class RayTracing:
@@ -19,6 +19,7 @@ class RayTracing:
                                                                player.pos.y + self.radius + 1),
                                            player.pos))
 
+    # @profile
     def calc_distances_dda(self, player, game_map):
         start_pos = player.pos
         for ray in range(self.rays):
@@ -77,7 +78,6 @@ class RayTracing:
                                                start_pos)
 
 
-    # @profile
     def calc_distances(self, player, game_map):
         for ray in range(self.rays):
             ray_angle = (player.angle - player.fov / 2) + (ray / self.rays) * player.fov
@@ -134,5 +134,18 @@ class Distance:
         self.distance = (vector - start_pos).length()
 
         self.vector = vector
+
+        atan_angle = math.atan2(self.vector.x, self.vector.y)
+
+        # self.sample_x = 0
+
+        if -math.pi * 0.25 <= atan_angle < math.pi * 0.25:
+            self.sample_x = self.vector.x - int(self.vector.x)
+        elif math.pi * 0.25 <= atan_angle < math.pi * 0.75:
+            self.sample_x = self.vector.y - int(self.vector.y)
+        elif -math.pi * 0.75 <= atan_angle < -math.pi * 0.25:
+            self.sample_x = self.vector.y - int(self.vector.y)
+        elif math.pi * 0.75 <= atan_angle or atan_angle < -math.pi * 0.75:
+            self.sample_x = self.vector.x - int(self.vector.x)
 
         # self.sample_x_factor = sample_x_factor

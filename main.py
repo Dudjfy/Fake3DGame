@@ -7,21 +7,21 @@ from gameMap import GameMap, Tile
 from player import Player
 from pygameWin import PygameWin
 from rayTracing import RayTracing
-# from line_profiler_pycharm import profile
+from line_profiler_pycharm import profile
 
-# @profile
+@profile
 def main():
     game_map = GameMap(20, 20)
-    game_map.create_map_from_file('map.txt')
-    # game_map.create_map_from_file('map_SA.txt')
+    # game_map.create_map_from_file('map.txt')
+    game_map.create_map_from_file('map_SA.txt')
     # game_map.create_empty_map_with_borders()
     # game_map.map[(5, 5)] = Tile('#', True)
 
-    p_x = (game_map.height + 1) / 2
-    p_y = (game_map.height + 1) / 2
+    # p_x = (game_map.height + 1) / 2
+    # p_y = (game_map.height + 1) / 2
 
-    # p_x = 78
-    # p_y = 19
+    p_x = 78
+    p_y = 19
 
     # p_x, p_y = game_map.return_random_empty_spot()
 
@@ -44,7 +44,7 @@ def main():
     # w, h, i_w = 1920, 1080, 400
 
     # Full screen smaller info
-    w, h, i_w = 1920, 1080, 200
+    # w, h, i_w = 1920, 1080, 200
 
     # Full screen no info
     # w, h, i_w = 1920, 1080, 0
