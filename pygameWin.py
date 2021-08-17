@@ -86,7 +86,7 @@ class PygameWin:
             if keys[pygame.K_RIGHT]:
                 player.new_angle += player.angle_change * dt.dt * self.arrows_sensitivity
         else:
-            player.new_angle = pygame.mouse.get_rel()[0] * dt.dt * self.mouse_sensitivity
+            player.new_angle = player.angle_change * pygame.mouse.get_rel()[0] * dt.dt * self.mouse_sensitivity
 
     # @profile
     def draw_on_update(self, player, game_map, rt, game_height_factor, game_width_factor):
@@ -99,7 +99,7 @@ class PygameWin:
         self.info_surface.fill(self.colors.get('gray'))
 
         # self.draw_ray_casted_lines(rt, game_height_factor, game_width_factor)
-        self.draw_with_px_arr(rt, game_height_factor, game_width_factor)
+        self.draw_lines_with_px_arr(rt, game_height_factor, game_width_factor)
         self.draw_info(player)
         # self.draw_mini_map(player, game_map, rt)
 
@@ -187,7 +187,7 @@ class PygameWin:
                                  (x * game_width_factor, line_end_y), game_width_factor)
 
     # @profile
-    def draw_with_px_arr(self, rt, game_height_factor, game_width_factor):
+    def draw_lines_with_px_arr(self, rt, game_height_factor, game_width_factor):
         px_arr = pygame.PixelArray(self.game_surface)
         for x, distance in enumerate(rt.distances):
             if distance.distance <= rt.radius:
@@ -197,12 +197,13 @@ class PygameWin:
                     line_start_y = (self.game_surface.get_height() / 2) - \
                                (self.game_surface.get_height() / distance.distance) / game_height_factor
                 line_end_y = int(self.game_surface.get_height() - line_start_y)
-                # shading = 255
                 shading = 255 - int((distance.distance / rt.radius) * 255)
-                # new_x = int(x * game_width_factor)
+                start_x = int(x * game_width_factor)
+                end_x = int((x + 1) * game_width_factor)
 
-                px_arr[x, int(line_start_y):line_end_y] = (shading, shading, shading)
+                px_arr[start_x:end_x, int(line_start_y):line_end_y] = (shading, shading, shading)
 
         px_arr.close()
 
-        test = 0
+    def draw_textures_with_px_arr(self, rt, game_height_factor, game_width_factor):
+        pass
