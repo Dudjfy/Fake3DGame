@@ -16,7 +16,7 @@ class PygameWin:
         'gray': (100, 100, 100),
     }
 
-    @profile
+    # @profile
     def __init__(self, win_width=1000, win_height=600, fps=60, win_name='Ray Tracing Test',
                  mouse_sensitivity=0.1, arrows_sensitivity=2, info_width=200):
         self.win_name = win_name
@@ -85,7 +85,7 @@ class PygameWin:
         else:
             player.new_angle = pygame.mouse.get_rel()[0] * dt.dt * self.mouse_sensitivity
 
-    def draw_on_update(self, player, game_map, rt, game_height_factor):
+    def draw_on_update(self, player, game_map, rt, game_height_factor, game_width_factor):
         self.win.fill(self.colors.get('green'))
         self.game_surface.fill(self.colors.get('black'))
         # self.game_surface.fill(self.colors.get('blue'), pygame.Rect(0,
@@ -94,7 +94,7 @@ class PygameWin:
         #                                                             (self.game_surface.get_height() / 2)))
         self.info_surface.fill(self.colors.get('gray'))
 
-        self.draw_ray_traced_lines(rt, game_height_factor)
+        self.draw_ray_traced_lines(rt, game_height_factor, game_width_factor)
         self.draw_info(player)
         self.draw_mini_map(player, game_map, rt)
 
@@ -150,30 +150,32 @@ class PygameWin:
                          (int((player.pos.x * tile_size_x + 10 * math.cos(player.angle))),
                           int((player.pos.y * tile_size_y + 10 * math.sin(player.angle)))))
 
-        for distance in rt.distances:
-            self.mini_map_surface.set_at((int(distance.vector.x * tile_size_x), int(distance.vector.y * tile_size_y)),
-                                         self.colors.get('green'))
+        # for distance in rt.distances:
+        #     self.mini_map_surface.set_at((int(distance.vector.x * tile_size_x), int(distance.vector.y * tile_size_y)),
+        #                                  self.colors.get('green'))
 
-
-    def draw_ray_traced_lines(self, rt, game_height_factor):
+    @profile
+    def draw_ray_traced_lines(self, rt, game_height_factor, game_width_factor):
         for x, distance in enumerate(rt.distances):
             # i = i * game_px_width
             if distance.distance <= rt.radius:
                 line_start_y = (self.game_surface.get_height() / 2) - \
                                (self.game_surface.get_height() / distance.distance) / game_height_factor
                 line_end_y = self.game_surface.get_height() - line_start_y
-                # shading = 255 - int((distance.distance / rt.radius) * 255)
+                shading = 255 - int((distance.distance / rt.radius) * 255)
 
-                line_len = int(line_end_y - line_start_y)
+                # line_len = int(line_end_y - line_start_y)
+                #
+                # for y in range(line_len):
+                #     sample_x = int(distance.sample_x * self.wall_sprite.get_width())
+                #     sample_y = int((y / line_len) * self.wall_sprite.get_height())
+                #     color = self.wall_sprite.get_at((sample_x, sample_y))
+                #
+                #     pygame.draw.line(self.game_surface, color,
+                #                      (x, int(line_start_y + y)),
+                #                      (int(x * game_width_factor), int(line_start_y + y)))
 
-                for y in range(line_len):
-                    sample_x = int(distance.sample_x * self.wall_sprite.get_width())
-                    sample_y = int((y / line_len) * self.wall_sprite.get_height())
-                    color = self.wall_sprite.get_at((sample_x, sample_y))
-
-                    self.game_surface.set_at((x, int(line_start_y + y)), color)
-
-                # pygame.draw.line(self.game_surface,
-                #                  (shading, shading, shading),
-                #                  (x, line_start_y),
-                #                  (x, line_end_y))
+                pygame.draw.line(self.game_surface,
+                                 (shading, shading, shading),
+                                 (x, line_start_y),
+                                 (x, line_end_y))

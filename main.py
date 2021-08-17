@@ -25,9 +25,10 @@ def main():
 
     # p_x, p_y = game_map.return_random_empty_spot()
 
+    game_width_factor = 1
     game_height_factor = 2
 
-    player = Player(x=p_x, y=p_y, vel=10, fov=math.pi / 2, angle_change=(math.pi / 2))
+    player = Player(x=p_x, y=p_y, vel=10, fov=math.pi / 2, angle=math.pi, angle_change=(math.pi / 2))
 
     """         Window presets          """
 
@@ -79,7 +80,7 @@ def main():
 
 
     dt = DeltaTime()
-    rt = RayTracing(int(py_win.game_surface.get_width()), steps=100, radius=10, player=player)
+    rt = RayTracing(int(py_win.game_surface.get_width() / game_width_factor), steps=100, radius=10, player=player)
 
     game_on = True
     while game_on:
@@ -93,10 +94,10 @@ def main():
         player.move(dt, game_map)
         player.change_angle(dt)
 
-        rt.calc_distances_dda(player, game_map)
-        # rt.calc_distances(player, game_map)
+        # rt.calc_distances_dda(player, game_map)
+        rt.calc_distances(player, game_map)
 
-        py_win.draw_on_update(player, game_map, rt, game_height_factor)
+        py_win.draw_on_update(player, game_map, rt, game_height_factor, game_width_factor)
 
 if __name__ == '__main__':
     main()
