@@ -13,7 +13,8 @@ class RayTracing:
 
         self.distances = []
         # for item in range(rays):
-        #     self.distances.append(Distance(player.pos + self.radius + 1, 0))
+        #     self.distances.append(Distance_old((player.pos.x + self.radius + 1,
+        #                                         player.pos.y + self.radius + 1), 0))
         for item in range(rays):
             self.distances.append(Distance(pygame.math.Vector2(player.pos.x + self.radius + 1,
                                                                player.pos.y + self.radius + 1),
@@ -77,7 +78,7 @@ class RayTracing:
                                                                    start_pos.y + self.radius + 1),
                                                start_pos)
 
-    @profile
+    # @profile
     def calc_distances(self, player, game_map):
         for ray in range(self.rays):
             ray_angle = (player.angle - player.fov / 2) + (ray / self.rays) * player.fov
@@ -119,6 +120,24 @@ class RayTracing:
                     #     sample_x = float_y - tile_y
 
                     self.distances[ray] = Distance_old(self.step_size * step, sample_x)
+                    break
+            else:
+                self.distances[ray] = Distance_old(self.radius + 1, 0)
+
+
+    def calc_distances_old(self, player, game_map):
+        for ray in range(self.rays):
+            ray_angle = (player.angle - player.fov / 2) + (ray / self.rays) * player.fov
+            x = math.cos(ray_angle)
+            y = math.sin(ray_angle)
+            for step in range(self.steps):
+                coords = (int(player.pos.x + x * self.step_size * step), int(player.pos.y + y * self.step_size * step))
+                tile = game_map.map.get(coords)
+                if tile == None:
+                    self.distances[ray] = Distance_old(self.radius + 1, 0)
+                    break
+                elif tile.blocks_movement:
+                    self.distances[ray] = Distance_old(self.step_size * step, 0)
                     break
             else:
                 self.distances[ray] = Distance_old(self.radius + 1, 0)

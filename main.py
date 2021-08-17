@@ -9,7 +9,7 @@ from pygameWin import PygameWin
 from rayTracing import RayTracing
 from line_profiler_pycharm import profile
 
-@profile
+# @profile
 def main():
     game_map = GameMap(20, 20)
     # game_map.create_map_from_file('map.txt')
@@ -59,13 +59,8 @@ def main():
     # Performance 3
     # w, h, i_w = 200, 100, 0
 
-
     py_win = PygameWin(win_width=w, win_height=h, fps=200, win_name='Ray Tracing Test',
                        mouse_sensitivity=0.1, arrows_sensitivity=2, info_width=i_w)
-
-    # print(win.get_width(), win.get_height(), game_surface.get_width(), game_surface.get_height(),
-    #       info_surface.get_width(), info_surface.get_height())
-
 
     class DeltaTime:
         def __init__(self):
@@ -77,7 +72,6 @@ def main():
             self.now = time.time()
             self.dt = self.now - self.prev_time
             self.prev_time = self.now
-
 
     dt = DeltaTime()
     rt = RayTracing(int(py_win.game_surface.get_width() / game_width_factor), steps=100, radius=10, player=player)
@@ -94,10 +88,11 @@ def main():
         player.move(dt, game_map)
         player.change_angle(dt)
 
-        # rt.calc_distances_dda(player, game_map)
-        rt.calc_distances(player, game_map)
+        rt.calc_distances_dda(player, game_map)
+        # rt.calc_distances_old(player, game_map)
 
         py_win.draw_on_update(player, game_map, rt, game_height_factor, game_width_factor)
+
 
 if __name__ == '__main__':
     main()

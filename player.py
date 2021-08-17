@@ -14,6 +14,7 @@ class Player:
         self.new_y = 0
         self.new_angle = 0
 
+        self.vel = vel
         self.move_distance = vel
         self.tick = 0
 

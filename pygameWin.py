@@ -16,7 +16,6 @@ class PygameWin:
         'gray': (100, 100, 100),
     }
 
-    # @profile
     def __init__(self, win_width=1000, win_height=600, fps=60, win_name='Ray Tracing Test',
                  mouse_sensitivity=0.1, arrows_sensitivity=2, info_width=200):
         self.win_name = win_name
@@ -57,6 +56,10 @@ class PygameWin:
 
             player.new_x = 0
             player.new_y = 0
+            player.move_distance = player.vel
+
+            if keys[pygame.K_LSHIFT]:
+                player.move_distance /= 10
 
             if keys[pygame.K_w] or keys[pygame.K_UP]:
                 player.new_x = math.cos(player.angle) * player.move_distance * dt.dt
@@ -85,6 +88,7 @@ class PygameWin:
         else:
             player.new_angle = pygame.mouse.get_rel()[0] * dt.dt * self.mouse_sensitivity
 
+    # @profile
     def draw_on_update(self, player, game_map, rt, game_height_factor, game_width_factor):
         self.win.fill(self.colors.get('green'))
         self.game_surface.fill(self.colors.get('black'))
@@ -94,9 +98,10 @@ class PygameWin:
         #                                                             (self.game_surface.get_height() / 2)))
         self.info_surface.fill(self.colors.get('gray'))
 
-        self.draw_ray_traced_lines(rt, game_height_factor, game_width_factor)
+        # self.draw_ray_casted_lines(rt, game_height_factor, game_width_factor)
+        self.draw_with_px_arr(rt, game_height_factor, game_width_factor)
         self.draw_info(player)
-        self.draw_mini_map(player, game_map, rt)
+        # self.draw_mini_map(player, game_map, rt)
 
         self.win.blit(self.game_surface, (0, 0))
         self.info_surface.blit(self.mini_map_surface,
@@ -118,6 +123,7 @@ class PygameWin:
         self.info_surface.blit(y_text, (20, 60))
         self.info_surface.blit(angle_text, (20, 80))
 
+    # @profile
     def draw_mini_map(self, player, game_map, rt):
         self.mini_map_surface.fill(self.colors.get('green'))
 
@@ -154,8 +160,8 @@ class PygameWin:
         #     self.mini_map_surface.set_at((int(distance.vector.x * tile_size_x), int(distance.vector.y * tile_size_y)),
         #                                  self.colors.get('green'))
 
-    @profile
-    def draw_ray_traced_lines(self, rt, game_height_factor, game_width_factor):
+    # @profile
+    def draw_ray_casted_lines(self, rt, game_height_factor, game_width_factor):
         for x, distance in enumerate(rt.distances):
             # i = i * game_px_width
             if distance.distance <= rt.radius:
@@ -177,5 +183,20 @@ class PygameWin:
 
                 pygame.draw.line(self.game_surface,
                                  (shading, shading, shading),
-                                 (x, line_start_y),
-                                 (x, line_end_y))
+                                 (x * game_width_factor, line_start_y),
+                                 (x * game_width_factor, line_end_y), game_width_factor)
+
+    def draw_with_px_arr(self, rt, game_height_factor, game_width_factor):
+        px_arr = pygame.PixelArray(self.game_surface)
+        for x, distance in enumerate(rt.distances):
+            if distance.distance <= rt.radius:
+                line_start_y = int((self.game_surface.get_height() / 2) -
+                                   (self.game_surface.get_height() / distance.distance) / game_height_factor)
+                line_end_y = int(self.game_surface.get_height() - line_start_y)
+                shading = 255
+                # shading = 255 - int((distance.distance / rt.radius) * 255)
+                # new_x = int(x * game_width_factor)
+
+                px_arr[x, line_start_y:line_end_y] = (shading, shading, shading)
+
+        px_arr.close()
