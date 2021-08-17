@@ -186,17 +186,23 @@ class PygameWin:
                                  (x * game_width_factor, line_start_y),
                                  (x * game_width_factor, line_end_y), game_width_factor)
 
+    # @profile
     def draw_with_px_arr(self, rt, game_height_factor, game_width_factor):
         px_arr = pygame.PixelArray(self.game_surface)
         for x, distance in enumerate(rt.distances):
             if distance.distance <= rt.radius:
-                line_start_y = int((self.game_surface.get_height() / 2) -
-                                   (self.game_surface.get_height() / distance.distance) / game_height_factor)
+                if distance.distance <= 1:
+                    line_start_y = 0
+                else:
+                    line_start_y = (self.game_surface.get_height() / 2) - \
+                               (self.game_surface.get_height() / distance.distance) / game_height_factor
                 line_end_y = int(self.game_surface.get_height() - line_start_y)
-                shading = 255
-                # shading = 255 - int((distance.distance / rt.radius) * 255)
+                # shading = 255
+                shading = 255 - int((distance.distance / rt.radius) * 255)
                 # new_x = int(x * game_width_factor)
 
-                px_arr[x, line_start_y:line_end_y] = (shading, shading, shading)
+                px_arr[x, int(line_start_y):line_end_y] = (shading, shading, shading)
 
         px_arr.close()
+
+        test = 0
