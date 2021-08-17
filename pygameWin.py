@@ -40,12 +40,14 @@ class PygameWin:
                                             self.win.get_height()))
         self.mini_map_surface = pygame.Surface((self.info_surface.get_width(), self.info_surface.get_width()))
 
-        self.wall_sprite = pygame.image.load('wall_16x16.png')
-        # self.wall_sprite = pygame.image.load('bricks_16x16.png')
+        # self.wall_sprite = pygame.image.load('wall_16x16.png')
+        self.wall_sprite = pygame.image.load('bricks_16x16.png')
         # self.wall_sprite = pygame.image.load('bricks_64x64.png')
         # self.wall_sprite = pygame.image.load('wall_256x265.png')
         # self.wall_sprite = pygame.image.load('gray_wall_256x256.png')
         # print(self.wall_sprite.get_at((0, 0)), self.wall_sprite.get_at((1, 0)))
+
+        self.sprite_px_arr = pygame.PixelArray(self.wall_sprite.convert())
 
     def event_handler(self, player, dt):
         for event in pygame.event.get():
@@ -211,7 +213,6 @@ class PygameWin:
     # @profile
     def draw_textures_with_px_arr(self, rt, game_height_factor, game_width_factor):
         px_arr = pygame.PixelArray(self.game_surface)
-        sprite_px_arr = pygame.PixelArray(self.wall_sprite)
         for x, distance in enumerate(rt.distances):
             if distance.distance <= rt.radius:
                 if distance.distance <= 1:
@@ -229,17 +230,18 @@ class PygameWin:
                 if line_len <= self.wall_sprite.get_width():
                     for y in range(line_len):
                         sample_y = int((y / line_len) * self.wall_sprite.get_height())
-                        color = sprite_px_arr[sample_x, sample_y]
+                        # color = self.sprite_px_arr[sample_x, sample_y]
+                        color = self.wall_sprite.get_at((sample_x, sample_y))
 
                         px_arr[start_x:end_x, int(start_y + y)] = color
                 else:
                     y_step_len = line_len / self.wall_sprite.get_width()
                     for sample_y in range(self.wall_sprite.get_width()):
-                        color = sprite_px_arr[sample_x, sample_y]
+                        color = self.sprite_px_arr[sample_x, sample_y]
+                        # color = self.wall_sprite.get_at((sample_x, sample_y))
                         y_step_start = int(start_y) + int(sample_y * y_step_len)
                         y_step_end = math.ceil(y_step_start + y_step_len)
 
                         px_arr[start_x:end_x, y_step_start:y_step_end] = color
 
         px_arr.close()
-        sprite_px_arr.close()
