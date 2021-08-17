@@ -98,8 +98,11 @@ class PygameWin:
         #                                                             (self.game_surface.get_height() / 2)))
         self.info_surface.fill(self.colors.get('gray'))
 
+        self.draw_textures_with_px_arr(rt, game_height_factor, game_width_factor)
+
         # self.draw_ray_casted_lines(rt, game_height_factor, game_width_factor)
-        self.draw_lines_with_px_arr(rt, game_height_factor, game_width_factor)
+        # self.draw_lines_with_px_arr(rt, game_height_factor, game_width_factor)
+
         self.draw_info(player)
         # self.draw_mini_map(player, game_map, rt)
 
@@ -192,18 +195,51 @@ class PygameWin:
         for x, distance in enumerate(rt.distances):
             if distance.distance <= rt.radius:
                 if distance.distance <= 1:
-                    line_start_y = 0
+                    start_y = 0
                 else:
-                    line_start_y = (self.game_surface.get_height() / 2) - \
+                    start_y = (self.game_surface.get_height() / 2) - \
                                (self.game_surface.get_height() / distance.distance) / game_height_factor
-                line_end_y = int(self.game_surface.get_height() - line_start_y)
+                line_end_y = int(self.game_surface.get_height() - start_y)
                 shading = 255 - int((distance.distance / rt.radius) * 255)
                 start_x = int(x * game_width_factor)
-                end_x = int((x + 1) * game_width_factor)
+                end_x = int(start_x + game_height_factor)
 
-                px_arr[start_x:end_x, int(line_start_y):line_end_y] = (shading, shading, shading)
+                px_arr[start_x:end_x, int(start_y):line_end_y] = (shading, shading, shading)
 
         px_arr.close()
 
+    # @profile
     def draw_textures_with_px_arr(self, rt, game_height_factor, game_width_factor):
-        pass
+        px_arr = pygame.PixelArray(self.game_surface)
+        sprite_px_arr = pygame.PixelArray(self.wall_sprite)
+        for x, distance in enumerate(rt.distances):
+            if distance.distance <= rt.radius:
+                if distance.distance <= 1:
+                    start_y = 0
+                else:
+                    start_y = (self.game_surface.get_height() / 2) - \
+                                   (self.game_surface.get_height() / distance.distance) / game_height_factor
+                end_y = int(self.game_surface.get_height() - start_y)
+                start_x = int(x * game_width_factor)
+                end_x = int(start_x + game_width_factor)
+
+                line_len = int(end_y - start_y)
+                sample_x = int(distance.sample_x * self.wall_sprite.get_width())
+
+                if line_len <= self.wall_sprite.get_width():
+                    for y in range(line_len):
+                        sample_y = int((y / line_len) * self.wall_sprite.get_height())
+                        color = sprite_px_arr[sample_x, sample_y]
+
+                        px_arr[start_x:end_x, int(start_y + y)] = color
+                else:
+                    y_step_len = line_len / self.wall_sprite.get_width()
+                    for sample_y in range(self.wall_sprite.get_width()):
+                        color = sprite_px_arr[sample_x, sample_y]
+                        y_step_start = int(start_y) + int(sample_y * y_step_len)
+                        y_step_end = math.ceil(y_step_start + y_step_len)
+
+                        px_arr[start_x:end_x, y_step_start:y_step_end] = color
+
+        px_arr.close()
+        sprite_px_arr.close()

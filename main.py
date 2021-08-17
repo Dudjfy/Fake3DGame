@@ -21,14 +21,14 @@ def main():
     # p_y = (game_map.height + 1) / 2
 
     p_x = 78
-    p_y = 19
+    p_y = 19.5
 
     # p_x, p_y = game_map.return_random_empty_spot()
 
     game_width_factor = 1
     game_height_factor = 2
 
-    player = Player(x=p_x, y=p_y, vel=10, fov=math.pi / 2, angle=math.pi, angle_change=(math.pi / 2))
+    player = Player(x=p_x, y=p_y, vel=10, fov=math.pi / 2, angle=0, angle_change=(math.pi / 2))
 
     """         Window presets          """
 

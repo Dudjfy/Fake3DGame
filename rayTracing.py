@@ -18,7 +18,7 @@ class RayTracing:
         for item in range(rays):
             self.distances.append(Distance(pygame.math.Vector2(player.pos.x + self.radius + 1,
                                                                player.pos.y + self.radius + 1),
-                                           player.pos))
+                                           player.pos, pygame.math.Vector2(0, 0)))
 
     # @profile
     def calc_distances_dda(self, player, game_map):
@@ -32,7 +32,7 @@ class RayTracing:
             if end_pos_norm.x == 0 or end_pos_norm.y == 0:
                 self.distances[ray] = Distance(pygame.math.Vector2(start_pos.x + self.radius + 1,
                                                                    start_pos.y + self.radius + 1),
-                                               start_pos)
+                                               start_pos, pygame.math.Vector2(0, 0))
                 continue
 
             step_size = pygame.math.Vector2(math.sqrt(1 + (end_pos_norm.y / end_pos_norm.x) ** 2),
@@ -67,16 +67,15 @@ class RayTracing:
                     distance = ray_len.y
                     ray_len.y += step_size.y
 
-                # if 0 <= map_coords.x < game_map.width and 0 <= map_coords.y < game_map.height:
                 if game_map.map.get((map_coords.x, map_coords.y)).blocks_movement:
                     hit_tile = True
 
             if hit_tile:
-                self.distances[ray] = Distance(start_pos + end_pos_norm * distance, start_pos)
+                self.distances[ray] = Distance(start_pos + end_pos_norm * distance, start_pos, map_coords)
             else:
                 self.distances[ray] = Distance(pygame.math.Vector2(start_pos.x + self.radius + 1,
                                                                    start_pos.y + self.radius + 1),
-                                               start_pos)
+                                               start_pos, pygame.math.Vector2(0, 0))
 
     # @profile
     def calc_distances(self, player, game_map):
@@ -149,22 +148,20 @@ class Distance_old:
         self.sample_x_factor = sample_x_factor
 
 class Distance:
-    def __init__(self, vector, start_pos):
+    def __init__(self, vector, start_pos, tile):
         self.distance = (vector - start_pos).length()
 
         self.vector = vector
 
-        # atan_angle = math.atan2(self.vector.x, self.vector.y)
+        atan_angle = math.atan2(vector.x - (tile.x + 0.5), vector.y - (tile.y + 0.5))
 
-        # self.sample_x = 0
+        self.sample_x = 0
 
-        # if -math.pi * 0.25 <= atan_angle < math.pi * 0.25:
-        #     self.sample_x = self.vector.y - int(self.vector.y)
-        # elif math.pi * 0.25 <= atan_angle < math.pi * 0.75:
-        #     self.sample_x = self.vector.x - int(self.vector.x)
-        # elif -math.pi * 0.75 <= atan_angle < -math.pi * 0.25:
-        #     self.sample_x = self.vector.x - int(self.vector.x)
-        # elif math.pi * 0.75 <= atan_angle or atan_angle < -math.pi * 0.75:
-        #     self.sample_x = self.vector.y - int(self.vector.y)
-
-        # self.sample_x_factor = sample_x_factor
+        if -math.pi * 0.25 <= atan_angle < math.pi * 0.25:
+            self.sample_x = self.vector.x - int(self.vector.x)
+        elif math.pi * 0.25 <= atan_angle < math.pi * 0.75:
+            self.sample_x = self.vector.y - int(self.vector.y)
+        elif -math.pi * 0.75 <= atan_angle < -math.pi * 0.25:
+            self.sample_x = self.vector.y - int(self.vector.y)
+        elif math.pi * 0.75 <= atan_angle or atan_angle < -math.pi * 0.75:
+            self.sample_x = self.vector.x - int(self.vector.x)
