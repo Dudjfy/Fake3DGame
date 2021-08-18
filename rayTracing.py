@@ -18,21 +18,21 @@ class RayTracing:
         for item in range(rays):
             self.distances.append(Distance(pygame.math.Vector2(player.pos.x + self.radius + 1,
                                                                player.pos.y + self.radius + 1),
-                                           player.pos, pygame.math.Vector2(0, 0)))
+                                           pygame.math.Vector2(0, 0)))
 
     # @profile
     def calc_distances_dda(self, player, game_map):
         start_pos = player.pos
         for ray in range(self.rays):
             ray_angle = (player.angle - player.fov / 2) + (ray / self.rays) * player.fov
-            x_end = math.cos(ray_angle) * self.radius
-            y_end = math.sin(ray_angle) * self.radius
+            x_end = math.cos(ray_angle)
+            y_end = math.sin(ray_angle)
             end_pos_norm = (pygame.math.Vector2(x_end, y_end)).normalize()
 
             if end_pos_norm.x == 0 or end_pos_norm.y == 0:
                 self.distances[ray] = Distance(pygame.math.Vector2(start_pos.x + self.radius + 1,
                                                                    start_pos.y + self.radius + 1),
-                                               start_pos, pygame.math.Vector2(0, 0))
+                                               pygame.math.Vector2(0, 0))
                 continue
 
             step_size = pygame.math.Vector2(math.sqrt(1 + (end_pos_norm.y / end_pos_norm.x) ** 2),
@@ -71,11 +71,11 @@ class RayTracing:
                     hit_tile = True
 
             if hit_tile:
-                self.distances[ray] = Distance(start_pos + end_pos_norm * distance, start_pos, map_coords)
+                self.distances[ray] = Distance(end_pos_norm * distance, map_coords, player.angle - ray_angle)
             else:
                 self.distances[ray] = Distance(pygame.math.Vector2(start_pos.x + self.radius + 1,
                                                                    start_pos.y + self.radius + 1),
-                                               start_pos, pygame.math.Vector2(0, 0))
+                                               pygame.math.Vector2(0, 0))
 
     # @profile
     def calc_distances(self, player, game_map):
@@ -148,8 +148,9 @@ class Distance_old:
         self.sample_x_factor = sample_x_factor
 
 class Distance:
-    def __init__(self, vector, start_pos, tile):
-        self.distance = (vector - start_pos).length()
+    def __init__(self, vector, tile, ray_angle=0):
+        self.distance = vector.length()
+        self.distance_norm = math.cos(ray_angle) * self.distance
 
         self.vector = vector
 

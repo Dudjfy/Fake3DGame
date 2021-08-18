@@ -195,23 +195,24 @@ class PygameWin:
     def draw_lines_with_px_arr(self, rt, game_height_factor, game_width_factor):
         px_arr = pygame.PixelArray(self.game_surface)
         for x, distance in enumerate(rt.distances):
-            if distance.distance <= rt.radius:
-                # if distance.distance <= 1:
-                #     start_y = 0
-                # else:
-                start_y = (self.game_surface.get_height() / 2) - \
-                           (self.game_surface.get_height() / distance.distance) / game_height_factor
+            if distance.distance_norm <= rt.radius:
+                if distance.distance_norm <= 1:
+                    start_y = 0
+                else:
+                    start_y = (self.game_surface.get_height() / 2) - \
+                               (self.game_surface.get_height() / distance.distance_norm) / game_height_factor
                 line_end_y = int(self.game_surface.get_height() - start_y)
-                shading = 255 - int((distance.distance / rt.radius) * 255)
+                shading = 255 - int((distance.distance_norm / rt.radius) * 255)
+                # shading = 255
                 start_x = int(x * game_width_factor)
-                end_x = int(start_x + game_height_factor)
+                end_x = int(start_x + game_width_factor)
 
                 px_arr[start_x:end_x, int(start_y):line_end_y] = (shading, shading, shading)
 
         px_arr.close()
         test = 0
 
-    # @profile
+    # @profiles
     def draw_textures_with_px_arr(self, rt, game_height_factor, game_width_factor):
         px_arr = pygame.PixelArray(self.game_surface)
         for x, distance in enumerate(rt.distances):
