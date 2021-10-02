@@ -59,6 +59,9 @@ def main():
     # Performance 3
     # w, h, i_w = 200, 100, 0
 
+    # Laptop
+    # w, h, i_w = 1366, 768, 200
+
     py_win = PygameWin(win_width=w, win_height=h, fps=1000, win_name='Ray Tracing Test',
                        mouse_sensitivity=0.1, arrows_sensitivity=2, info_width=i_w)
 

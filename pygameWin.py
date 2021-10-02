@@ -23,6 +23,8 @@ class PygameWin:
         self.tick = 0
 
         self.info_width = info_width
+        self.show_map = True
+        self.draw_textures = True
 
         self.win = pygame.display.set_mode((win_width, win_height))
         pygame.display.set_caption(self.win_name)
@@ -40,8 +42,8 @@ class PygameWin:
                                             self.win.get_height()))
         self.mini_map_surface = pygame.Surface((self.info_surface.get_width(), self.info_surface.get_width()))
 
-        # self.wall_sprite = pygame.image.load('wall_16x16.png')
-        self.wall_sprite = pygame.image.load('bricks_16x16.png')
+        self.wall_sprite = pygame.image.load('wall_16x16.png')
+        # self.wall_sprite = pygame.image.load('bricks_16x16.png')
         # self.wall_sprite = pygame.image.load('bricks_64x64.png')
         # self.wall_sprite = pygame.image.load('wall_256x265.png')
         # self.wall_sprite = pygame.image.load('gray_wall_256x256.png')
@@ -62,6 +64,27 @@ class PygameWin:
 
             if keys[pygame.K_LSHIFT]:
                 player.move_distance /= 10
+
+            if keys[pygame.K_1]:
+                self.wall_sprite = pygame.image.load('wall_16x16.png')
+                self.sprite_px_arr = pygame.PixelArray(self.wall_sprite.convert())
+            if keys[pygame.K_2]:
+                self.wall_sprite = pygame.image.load('bricks_16x16.png')
+                self.sprite_px_arr = pygame.PixelArray(self.wall_sprite.convert())
+            if keys[pygame.K_3]:
+                self.wall_sprite = pygame.image.load('bricks_64x64.png')
+                self.sprite_px_arr = pygame.PixelArray(self.wall_sprite.convert())
+            if keys[pygame.K_4]:
+                self.wall_sprite = pygame.image.load('wall_256x265.png')
+                self.sprite_px_arr = pygame.PixelArray(self.wall_sprite.convert())
+            if keys[pygame.K_5]:
+                self.wall_sprite = pygame.image.load('gray_wall_256x256.png')
+                self.sprite_px_arr = pygame.PixelArray(self.wall_sprite.convert())
+            if keys[pygame.K_0] and event.type == pygame.KEYDOWN:
+                self.draw_textures = not self.draw_textures
+
+            if keys[pygame.K_m] and event.type == pygame.KEYDOWN:
+                self.show_map = not self.show_map
 
             if keys[pygame.K_w] or keys[pygame.K_UP]:
                 player.new_x = math.cos(player.angle) * player.move_distance * dt.dt
@@ -94,19 +117,23 @@ class PygameWin:
     def draw_on_update(self, player, game_map, rt, game_height_factor, game_width_factor):
         self.win.fill(self.colors.get('green'))
         self.game_surface.fill(self.colors.get('black'))
+        self.mini_map_surface.fill(self.colors.get('black'))
+
         # self.game_surface.fill(self.colors.get('blue'), pygame.Rect(0,
         #                                                             0,
         #                                                             self.game_surface.get_width(),
         #                                                             (self.game_surface.get_height() / 2)))
         self.info_surface.fill(self.colors.get('gray'))
 
-        self.draw_textures_with_px_arr(rt, game_height_factor, game_width_factor)
-
-        # self.draw_ray_casted_lines(rt, game_height_factor, game_width_factor)
-        # self.draw_lines_with_px_arr(rt, game_height_factor, game_width_factor)
+        if self.draw_textures:
+            self.draw_textures_with_px_arr(rt, game_height_factor, game_width_factor)
+        else:
+            # self.draw_ray_casted_lines(rt, game_height_factor, game_width_factor)
+            self.draw_lines_with_px_arr(rt, game_height_factor, game_width_factor)
 
         self.draw_info(player)
-        # self.draw_mini_map(player, game_map, rt)
+        if self.show_map:
+            self.draw_mini_map(player, game_map, rt)
 
         self.win.blit(self.game_surface, (0, 0))
         self.info_surface.blit(self.mini_map_surface,
@@ -130,8 +157,6 @@ class PygameWin:
 
     # @profile
     def draw_mini_map(self, player, game_map, rt):
-        self.mini_map_surface.fill(self.colors.get('green'))
-
         tile_size_x = self.mini_map_surface.get_width() / game_map.width
         tile_size_y = self.mini_map_surface.get_height() / game_map.height
 
@@ -196,10 +221,10 @@ class PygameWin:
         px_arr = pygame.PixelArray(self.game_surface)
         for x, distance in enumerate(rt.distances):
             if distance.distance <= rt.radius:
-                # if distance.distance <= 1:
-                #     start_y = 0
-                # else:
-                start_y = (self.game_surface.get_height() / 2) - \
+                if distance.distance <= 1:
+                    start_y = 0
+                else:
+                    start_y = (self.game_surface.get_height() / 2) - \
                            (self.game_surface.get_height() / distance.distance) / game_height_factor
                 line_end_y = int(self.game_surface.get_height() - start_y)
                 shading = 255 - int((distance.distance / rt.radius) * 255)
